@@ -92,6 +92,24 @@ def evaluate_insights(df,category):
     
     return insights
 
+# Generate the next suggestion ID based on the feedback file
+def get_next_suggestion_id(feedback_file='feedback.csv'):
+    if os.path.isfile(feedback_file):
+        feedback_df = pd.read_csv(feedback_file)
+        if 'Suggestion_ID' in feedback_df.columns and not feedback_df.empty:
+            last_id = feedback_df['Suggestion_ID'].max()
+            return last_id + 1
+    return 1
+
+# Save feedback to a CSV file
+def save_feedback(suggestion_id, rating, comment, feedback_file='feedback.csv'):
+    file_exists = os.path.isfile(feedback_file)
+
+    feedback_df = pd.DataFrame([[suggestion_id, rating, comment]], columns=['Suggestion_ID', 'Rating', 'Comment'])
+
+    feedback_df.to_csv(feedback_file, mode='a', header=not file_exists, index=False)
+
+
 # Submit route to handle uploaded CSV files
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -114,6 +132,15 @@ def submit():
 
     # Render the insights in the HTML page
     return render_template('insights.html', insights=all_insights)
+
+# Route to collect feedback
+@app.route('/feedback', methods=['POST'])
+def feedback():
+    rating = request.form.get('rating')
+    comment = request.form.get('comment')
+    suggestion_id = get_next_suggestion_id()
+    save_feedback(suggestion_id, rating, comment)
+    return render_template('thank_you.html')
 
 # Home route to display the upload form
 @app.route('/')
