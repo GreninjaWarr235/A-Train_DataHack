@@ -1,4 +1,3 @@
-# .github/workflows/cd.yml
 name: CD Pipeline
 on:
   push:
@@ -9,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Upgrade to v3, compatible with node16 and node20
       
       - name: Build Docker image
         run: docker build -t mymodel:latest .
