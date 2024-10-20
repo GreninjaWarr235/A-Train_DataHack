@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
+import tempfile
 import pandas as pd
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -117,6 +118,9 @@ def submit():
         return 'No file part in the form.'
     category = request.form.get('category')
     csv_files = request.files.getlist('csv_files')
+
+    # Initialize insights in a temporary file
+    temp_file_path = tempfile.NamedTemporaryFile(delete=False, suffix='.csv').name
     all_insights = []
 
     for file in csv_files:
@@ -127,11 +131,20 @@ def submit():
 
             # Read the CSV file and evaluate insights
             df = pd.read_csv(file_path)
-            insights = evaluate_insights(df,category)
+            insights = evaluate_insights(df, category)
             all_insights.extend(insights)
 
-    # Render the insights in the HTML page
-    return render_template('insights.html', insights=all_insights)
+    # Save insights to the temporary CSV file
+    insights_df = pd.DataFrame(all_insights, columns=['Insight'])
+    insights_df.to_csv(temp_file_path, index=False)
+
+    return render_template('insights.html', insights=all_insights, temp_file_path=temp_file_path)
+
+@app.route('/download_insights', methods=['GET'])
+def download_insights():
+    # Use the path stored in the template to serve the insights
+    temp_file_path = request.args.get('temp_file_path')
+    return send_file(temp_file_path, as_attachment=True)
 
 # Route to collect feedback
 @app.route('/feedback', methods=['POST'])
