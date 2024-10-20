@@ -21,7 +21,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'  # Use the version your project requires
+        python-version: '3.11'  
 
     - name: Install dependencies
       run: |
@@ -32,15 +32,23 @@ jobs:
       run: |
         pip install flake8
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-      continue-on-error: true  # Continue even if linting fails (optional)
+      continue-on-error: true  
 
     - name: Run tests with pytest
       run: |
         pip install pytest
         pytest
 
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install Vercel CLI
+      run: npm install -g vercel
+
     - name: Vercel Deployment (Optional Step)
       if: github.ref == 'refs/heads/main' && success() # Deploy only when on the main branch and all steps pass
       run: vercel --prod
       env:
-        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}  # Use Vercel token from GitHub Secrets
+        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }} 
