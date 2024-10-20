@@ -22,6 +22,10 @@
                 {% endfor %}
             </ul>
         </div>
+    <a href="{{ url_for('download_insights', temp_file_path=temp_file_path) }}" class="btn btn-primary">Download
+        Insights</a>
+
+
         <!-- Feedback Form -->
         <h5>We appreciate your feedback!</h5>
         <form action="/feedback" method="POST" class="mb-4">
